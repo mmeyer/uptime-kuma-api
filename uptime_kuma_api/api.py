@@ -470,6 +470,7 @@ class UptimeKumaApi(object):
         self.headers = headers
         self.wait_events = wait_events
         self.sio = socketio.Client(ssl_verify=ssl_verify)
+        self.ssl_verify = ssl_verify
 
         self._event_data: dict = {
             Event.MONITOR_LIST: None,
@@ -2003,7 +2004,7 @@ class UptimeKumaApi(object):
         """
         r1 = self._call('getStatusPage', slug)
         try:
-            r2 = requests.get(f"{self.url}/api/status-page/{slug}", timeout=self.timeout).json()
+            r2 = requests.get(f"{self.url}/api/status-page/{slug}", timeout=self.timeout, verify=self.ssl_verify).json()
         except requests.exceptions.Timeout as e:
             raise Timeout(e)
 
