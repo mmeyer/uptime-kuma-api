@@ -200,14 +200,14 @@ def notification_docstring(mode) -> str:
         :param str, optional recieverId: Notification option for ``type`` :attr:`~.NotificationType.ONEBOT`.
         :param int opsgeniePriority: Notification option for ``type`` :attr:`~.NotificationType.OPSGENIE`. Priority. Available values are numbers between ``1`` and ``5``.
         :param str, optional opsgenieRegion: Notification option for ``type`` :attr:`~.NotificationType.OPSGENIE`. Region. Available values are:
-            
+ 
             - ``us``: US (Default)
             - ``eu``: EU
         :param str, optional opsgenieApiKey: Notification option for ``type`` :attr:`~.NotificationType.OPSGENIE`. API Key.
-        :param str pagerdutyAutoResolve: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
-        :param str pagerdutyIntegrationUrl: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
-        :param str pagerdutyPriority: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
-        :param str, optional pagerdutyIntegrationKey: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
+        :param str, optional pagerdutyAutoResolve: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
+        :param str, optional pagerdutyIntegrationUrl: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
+        :param str, optional pagerdutyPriority: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
+        :param str, pagerdutyIntegrationKey: Notification option for ``type`` :attr:`~.NotificationType.PAGERDUTY`.
         :param str pagertreeAutoResolve: Notification option for ``type`` :attr:`~.NotificationType.PAGERTREE`. 
         
             Available values are:
