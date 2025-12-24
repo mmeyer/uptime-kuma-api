@@ -279,7 +279,7 @@ def _check_arguments_monitor(kwargs) -> None:
         MonitorType.RADIUS: ["radiusUsername", "radiusPassword", "radiusSecret", "radiusCalledStationId", "radiusCallingStationId"],
         MonitorType.REDIS: [],
         MonitorType.GROUP: [],
-        MonitorType.JSON_QUERY: ["url", "jsonPath", "expectedValue"],
+        MonitorType.JSON_QUERY: ["url", "jsonPath", "jsonPathOperator", "expectedValue"],
         MonitorType.REAL_BROWSER: ["url"],
         MonitorType.KAFKA_PRODUCER: ["kafkaProducerTopic", "kafkaProducerMessage"],
         MonitorType.TAILSCALE_PING: ["hostname"],
@@ -783,6 +783,7 @@ class UptimeKumaApi(object):
 
             # JSON_QUERY
             jsonPath: str = None,
+            jsonPathOperator: str = None,
             expectedValue: str = None,
 
             # KAFKA_PRODUCER
@@ -968,6 +969,7 @@ class UptimeKumaApi(object):
         if type == MonitorType.JSON_QUERY:
             data.update({
                 "jsonPath": jsonPath,
+                "jsonPathOperator": jsonPathOperator,
                 "expectedValue": expectedValue,
             })
 
@@ -1236,6 +1238,7 @@ class UptimeKumaApi(object):
                 'interval': 60,
                 'invertKeyword': False,
                 'jsonPath': None,
+                'jsonPathOperator': None,
                 'kafkaProducerAllowAutoTopicCreation': False,
                 'kafkaProducerBrokers': None,
                 'kafkaProducerMessage': None,

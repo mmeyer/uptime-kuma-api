@@ -333,6 +333,7 @@ class TestMonitor(UptimeKumaTestCase):
             "name": "monitor 1",
             "url": "http://127.0.0.1",
             "jsonPath": "address.country",
+            "jsonPathOperator": "==",
             "expectedValue": "germany",
         }
         self.do_test_monitor_type(expected_monitor)

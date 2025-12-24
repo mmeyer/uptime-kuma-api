@@ -84,6 +84,7 @@ def monitor_docstring(mode) -> str:
         :param str, optional game: Game, defaults to None
         :param bool, optional gamedigGivenPortOnly: Gamedig: Guess Port. The port used by Valve Server Query Protocol may be different from the client port. Try this if the monitor cannot connect to your server., defaults to False
         :param str, optional jsonPath: Json Query, defaults to None
+        :param str, optional jsonPath: Operator to use against Json Query value (jsonPath) with expected value (expectedValue), defaults to None
         :param str, optional expectedValue: Expected Value, defaults to None
         :param str, optional kafkaProducerBrokers: Kafka Broker list, defaults to None
         :param str, optional kafkaProducerTopic: Kafka Topic Name, defaults to None
