@@ -804,10 +804,8 @@ class UptimeKumaApi(object):
             mqttCheckType: str = "keyword",  # TODO might be an enum
             cacheBust: bool = False,
             remote_browser=None,
-            jsonPathOperator: str = "==",  # TODO might be an enum
             snmpVersion: str = "2c",  # TODO might be an enum
             rabbitmqNodes: list = None,
-            conditions: list = None,
             ipFamily=None,
             ping_numeric: bool = True,
             ping_count: int = 3,

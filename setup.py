@@ -32,7 +32,8 @@ setup(
     python_requires=">=3.7, <4",
     install_requires=[
         "python-socketio[client]>=5.0.0",
-        "packaging"
+        "packaging",
+        "requests"
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
