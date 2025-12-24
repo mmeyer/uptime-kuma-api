@@ -7,8 +7,10 @@ def parse_json_keys(data):
     keys = []
     for line in data.split("\n"):
         line = line.strip()
+        line = re.sub(r'//.*$', '', line)  # Remove // comments
         if not line:
             continue
+
         match = re.match(r'^([^:]+):', line)  # example: "type: this.type,"
         if match:
             key = match.group(1)
@@ -47,7 +49,7 @@ def parse_monitor(root):
     # todo: toPublicJSON ???
     with open(f'{root}/server/model/monitor.js') as f:
         content = f.read()
-    matches = re.findall(r'data = {([^}]+)}', content)
+    matches = re.findall(r'data = {[^;]*(?=};)}', content)
     all_keys = []
     for match in matches:
         keys = parse_json_keys(match)
@@ -134,8 +136,8 @@ if __name__ == "__main__":
         ["status page", parse_status_page],
         ["tag", parse_tag],
     ]:
-        keys_old = func(root_old)
         keys_new = func(root_new)
+        keys_old = func(root_old)
         print(f"{name}:")
         diff(keys_old, keys_new)
 

@@ -456,6 +456,10 @@ class UptimeKumaApi(object):
                               There is no way to determine when the last message of a certain type has arrived.
                               Therefore, a timeout is required. If no further message has arrived within this time,
                               it is assumed that it was the last message. Defaults is ``0.2``.
+    :param logger: To enable logging set to ``True`` or pass a logger object to
+                   use. To disable logging set to ``False``. The default is
+                   ``False``. Note that fatal errors are logged even when
+                   ``logger`` is ``False``.
     :raises UptimeKumaException: When connection to server failed.
     """
     def __init__(
@@ -464,13 +468,14 @@ class UptimeKumaApi(object):
             timeout: float = 10,
             headers: dict = None,
             ssl_verify: bool = True,
-            wait_events: float = 0.2
+            wait_events: float = 0.2,
+            logger=False,
     ) -> None:
         self.url = url.rstrip("/")
         self.timeout = timeout
         self.headers = headers
         self.wait_events = wait_events
-        self.sio = socketio.Client(ssl_verify=ssl_verify)
+        self.sio = socketio.Client(ssl_verify=ssl_verify, logger=logger)
         self.ssl_verify = ssl_verify
 
         self._event_data: dict = {
@@ -793,6 +798,22 @@ class UptimeKumaApi(object):
             kafkaProducerSsl: bool = False,
             kafkaProducerAllowAutoTopicCreation: bool = False,
             kafkaProducerSaslOptions: dict = None,
+
+            # 2.0.0
+            mqttCheckType: str = "keyword",  # TODO might be an enum
+            cacheBust: bool = False,
+            remote_browser=None,
+            jsonPathOperator: str = "==",  # TODO might be an enum
+            snmpVersion: str = "2c",  # TODO might be an enum
+            rabbitmqNodes: list = None,
+            conditions: list = None,
+            ipFamily=None,
+            ping_numeric: bool = True,
+            ping_count: int = 3,
+            ping_per_request_timeout: int = 2,
+            mqttWebsocketPath: str = None,
+            rabbitmqUsername: str = None,
+            rabbitmqPassword: str = None,
     ) -> dict:
         if accepted_statuscodes is None:
             accepted_statuscodes = ["200-299"]
@@ -811,6 +832,20 @@ class UptimeKumaApi(object):
             "resendInterval": resendInterval,
             "description": description,
             "httpBodyEncoding": httpBodyEncoding,
+            "mqttCheckType": mqttCheckType,
+            "cacheBust": cacheBust,
+            "remote_browser": remote_browser,
+            "jsonPathOperator": jsonPathOperator,
+            "snmpVersion": snmpVersion,
+            "rabbitmqNodes": rabbitmqNodes if rabbitmqNodes else list(),
+            "conditions": conditions if conditions else list(),
+            "ipFamily": ipFamily,
+            "ping_numeric": ping_numeric,
+            "ping_count": ping_count,
+            "ping_per_request_timeout": ping_per_request_timeout,
+            "mqttWebsocketPath": mqttWebsocketPath,
+            "rabbitmqUsername": rabbitmqUsername,
+            "rabbitmqPassword": rabbitmqPassword,
         }
 
         if parse_version(self.version) >= parse_version("1.22"):
@@ -1177,15 +1212,15 @@ class UptimeKumaApi(object):
             ]
         """
 
-        # TODO: replace with getMonitorList?
-
-        r = list(self._get_event_data(Event.MONITOR_LIST).values())
-        for monitor in r:
-            _convert_monitor_return(monitor)
-        int_to_bool(r, ["active"])
-        parse_monitor_type(r)
-        parse_auth_method(r)
-        return r
+        self._call('getMonitorList')
+        with self.wait_for_event(Event.MONITOR_LIST):
+            r = list(self._get_event_data(Event.MONITOR_LIST).values())
+            for monitor in r:
+                _convert_monitor_return(monitor)
+            int_to_bool(r, ["active"])
+            parse_monitor_type(r)
+            parse_auth_method(r)
+            return r
 
     def get_monitor(self, id_: int) -> dict:
         """
@@ -2767,7 +2802,7 @@ class UptimeKumaApi(object):
         :param str, optional chromeExecutable: Chrome/Chromium Executable, defaults to ""
         :param list, optional tlsExpiryNotifyDays: TLS Certificate Expiry. HTTPS Monitors trigger notification when TLS certificate expires in., defaults to None
         :param bool, optional disableAuth: Disable Authentication, defaults to False
-        :param bool, optional trustProxy: Trust Proxy. Trust 'X-Forwarded-\*' headers. If you want to get the correct client IP and your Uptime Kuma is behind such as Nginx or Apache, you should enable this., defaults to False
+        :param bool, optional trustProxy: Trust Proxy. Trust 'X-Forwarded-\\*' headers. If you want to get the correct client IP and your Uptime Kuma is behind such as Nginx or Apache, you should enable this., defaults to False
         :return: The server response.
         :rtype: dict
         :raises UptimeKumaException: If the server returns an error.

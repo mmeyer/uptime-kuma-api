@@ -10,3 +10,4 @@ from .maintenance_strategy import MaintenanceStrategy
 from .exceptions import UptimeKumaException, Timeout
 from .event import Event
 from .api import UptimeKumaApi
+from .dto import MonitorBuilder
