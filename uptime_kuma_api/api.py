@@ -1093,6 +1093,12 @@ class UptimeKumaApi(object):
             showPoweredBy: bool = True,
             showCertificateExpiry: bool = False,
 
+            # v2 fields
+            analyticsType: str = None,
+            analyticsScriptUrl: str = None,
+            showOnlyLastHeartbeat: bool = False,
+            rssTitle: str = None,
+
             icon: str = "/icon.svg",
             publicGroupList: list = None
     ) -> tuple[str, dict, str, list]:
@@ -1107,6 +1113,8 @@ class UptimeKumaApi(object):
             domainNameList = []
         if not publicGroupList:
             publicGroupList = []
+        # v2 renamed googleAnalyticsId -> analyticsId in the save payload too
+        analytics_key = "analyticsId" if parse_version(self.version) >= parse_version("2.0") else "googleAnalyticsId"
         config = {
             "id": id,
             "slug": slug,
@@ -1117,7 +1125,7 @@ class UptimeKumaApi(object):
             "published": published,
             "showTags": showTags,
             "domainNameList": domainNameList,
-            "googleAnalyticsId": googleAnalyticsId,
+            analytics_key: googleAnalyticsId or "",
             "customCSS": customCSS,
             "footerText": footerText,
             "showPoweredBy": showPoweredBy,
@@ -1125,6 +1133,13 @@ class UptimeKumaApi(object):
         if parse_version(self.version) >= parse_version("1.23"):
             config.update({
                 "showCertificateExpiry": showCertificateExpiry,
+            })
+        if parse_version(self.version) >= parse_version("2.0"):
+            config.update({
+                "analyticsType": analyticsType,  # None → null; server rejects empty string
+                "analyticsScriptUrl": analyticsScriptUrl or "",
+                "showOnlyLastHeartbeat": showOnlyLastHeartbeat or False,
+                "rssTitle": rssTitle or "",
             })
         return slug, config, icon, publicGroupList
 
@@ -2054,11 +2069,12 @@ class UptimeKumaApi(object):
 
         data = {
             **config,
-            "incident": r2["incident"],
-            "publicGroupList": r2["publicGroupList"],
-            "maintenanceList": r2["maintenanceList"]
+            "incident": r2.get("incident"),
+            "publicGroupList": r2.get("publicGroupList", []),
+            "maintenanceList": r2.get("maintenanceList", [])
         }
-        parse_incident_style(data["incident"])
+        if data["incident"]:
+            parse_incident_style(data["incident"])
         # convert sendUrl from int to bool
         for i in data["publicGroupList"]:
             for j in i["monitorList"]:
@@ -2170,10 +2186,19 @@ class UptimeKumaApi(object):
             }
         """
         status_page = self.get_status_page(slug)
-        status_page.pop("incident")
-        status_page.pop("maintenanceList")
-        status_page.pop("autoRefreshInterval")
+        status_page.pop("incident", None)
+        status_page.pop("maintenanceList", None)
+        status_page.pop("autoRefreshInterval", None)
+        # v2 renamed googleAnalyticsId -> analyticsId
+        if "analyticsId" in status_page and "googleAnalyticsId" not in status_page:
+            status_page["googleAnalyticsId"] = status_page.pop("analyticsId")
+        else:
+            status_page.pop("analyticsId", None)
         status_page.update(kwargs)
+        # strip any unknown keys that _build_status_page_data doesn't accept
+        import inspect
+        valid_keys = set(inspect.signature(self._build_status_page_data).parameters.keys())
+        status_page = {k: v for k, v in status_page.items() if k in valid_keys}
         data = self._build_status_page_data(**status_page)
         r = self._call('saveStatusPage', data)
 
